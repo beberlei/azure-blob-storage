@@ -1,0 +1,4 @@
+*.swp
+*.swo
+phpunit.xml
+vendor

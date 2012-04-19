@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<phpunit bootstrap="tests/bootstrap.php">
+    <testsuites>
+        <testsuite name="AzureBlog Storage">
+            <directory suffix="Test.php">tests/Beberlei</directory>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist>
+            <directory>lib/Beberlei</directory>
+        </whitelist>
+    </filter>
+
+    <php>
+        <var name="AZURESTORAGE_HOST" value="" />
+        <var name="AZURESTORAGE_ACCOUNT" value="" />
+        <var name="AZURESTORAGE_KEY" value="" />
+    </php>
+</phpunit>
+
