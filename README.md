@@ -1,12 +1,11 @@
-# Azure Blob
+# Azure Blob Storage
 
 Small library that allows you to work with Windows Azure Blob Storage from PHP.
 
-The code is forked and adapted from the PHP Azure SDK.
+The code is forked and adapted from the [PHP Azure SDK](http://phpazure.codeplex.com/).
 It was cleaned up slightly and removed all its dependencies to be very leightweight.
 
-You can work with Azure Blob from any platform (Windows or Linux) and only need an Azure storage account
-to get started.
+You can work with Windows Azure Blob from any platform (Windows or Linux) and only need an Azure storage account to get started.
 
 Features:
 
@@ -21,7 +20,7 @@ Suggested via composer:
 
     {
         "require": {
-            "beberlei/azure-blob": "*"
+            "beberlei/azure-blob-storage": "*"
         }
     }
 
@@ -39,3 +38,4 @@ Then using the composer binary:
     $accountKey = "abcdefg";
 
     $client = new BlobClient($accountUrl, $accountName, $accountKey);
+

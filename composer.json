@@ -1,7 +1,7 @@
 {
     "name": "beberlei/azure-blob-storage",
     "type": "library",
-    "description": "Simple library to access Microsoft Windows Azure Blob Storage with a Service or a StreamWrapper.",
+    "description": "Small library to access Microsoft Windows Azure Blob Storage with a Service or a StreamWrapper.",
     "keywords": ["storage", "streamwrapper", "cloud", "windows", "azure"],
     "license": "New BSD",
     "authors": [
