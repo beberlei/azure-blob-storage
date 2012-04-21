@@ -13,6 +13,7 @@
     </filter>
 
     <php>
+        <!-- Beware: Testing against a real Azure account can require you to pay the transation costs -->
         <var name="AZURESTORAGE_HOST" value="" />
         <var name="AZURESTORAGE_ACCOUNT" value="" />
         <var name="AZURESTORAGE_KEY" value="" />

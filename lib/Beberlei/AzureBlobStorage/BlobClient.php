@@ -2108,15 +2108,15 @@ class BlobClient
         $xml = @simplexml_load_string($response->getContent());
 
         if ($xml !== false) {
-            // Fetch all namespaces 
-            $namespaces = array_merge($xml->getNamespaces(true), $xml->getDocNamespaces(true)); 
+            // Fetch all namespaces
+            $namespaces = array_merge($xml->getNamespaces(true), $xml->getDocNamespaces(true));
 
             // Register all namespace prefixes
-            foreach ($namespaces as $prefix => $ns) { 
+            foreach ($namespaces as $prefix => $ns) {
                 if ($prefix != '') {
                     $xml->registerXPathNamespace($prefix, $ns);
-                } 
-            } 
+                }
+            }
         }
 
         return $xml;
@@ -2124,7 +2124,7 @@ class BlobClient
 
     /**
      * Parse metadata headers
-     * 
+     *
      * @param array $headers HTTP headers containing metadata
      * @return array
      */
@@ -2147,7 +2147,7 @@ class BlobClient
 
     /**
      * Parse metadata XML
-     * 
+     *
      * @param SimpleXMLElement $parentElement Element containing the Metadata element.
      * @return array
      */

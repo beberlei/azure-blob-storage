@@ -61,7 +61,7 @@ class BlobStorageTest extends BlobTestCase
         $result = $storageClient->createContainer($containerName);
         $this->assertEquals($containerName, $result->Name);
     }
-    
+
     /**
      * Test get container acl
      */
@@ -71,9 +71,9 @@ class BlobStorageTest extends BlobTestCase
         $storageClient = $this->createStorageInstance();
         $storageClient->createContainer($containerName);
         $acl = $storageClient->getContainerAcl($containerName);
-        $this->assertEquals(BlobClient::ACL_PRIVATE, $acl);        
+        $this->assertEquals(BlobClient::ACL_PRIVATE, $acl);
     }
-    
+
     /**
      * Test create container if not exists;
      */
@@ -98,7 +98,7 @@ class BlobStorageTest extends BlobTestCase
 
         $this->assertEquals(BlobClient::ACL_PRIVATE, $acl);
     }
-    
+
     /**
      * Test set container acl advanced
      */
@@ -136,7 +136,7 @@ class BlobStorageTest extends BlobTestCase
         $metadata = $storageClient->getContainerMetadata($containerName);
         $this->assertEquals('PHPAzure', $metadata['createdby']);
     }
-    
+
     /**
      * Test list containers
      */
@@ -162,7 +162,7 @@ class BlobStorageTest extends BlobTestCase
 
         $this->assertEquals(1, count($result2));
     }
-    
+
     /**
      * Test list containers with metadata
      */
@@ -180,7 +180,7 @@ class BlobStorageTest extends BlobTestCase
         $this->assertEquals('PHPAzure', $result[0]->Metadata['createdby']);
         $this->assertEquals('PHPAzure', $result[0]->Metadata['ownedby']);
     }
-    
+
     /**
      * Test put blob
      */
@@ -194,7 +194,7 @@ class BlobStorageTest extends BlobTestCase
         $this->assertEquals($containerName, $result->Container);
         $this->assertEquals('images/WindowsAzure.gif', $result->Name);
     }
-    
+
     /**
      * Test put blob data
      */
@@ -208,7 +208,7 @@ class BlobStorageTest extends BlobTestCase
         $this->assertEquals($containerName, $result->Container);
         $this->assertEquals('test.txt', $result->Name);
     }
-    
+
     /**
      * Test put large blob
      */
@@ -232,7 +232,7 @@ class BlobStorageTest extends BlobTestCase
         // Remove file
         unlink($fileName);
     }
-    
+
     /**
      * Test get blob
      */
@@ -255,7 +255,7 @@ class BlobStorageTest extends BlobTestCase
         // Remove file
         unlink($fileName);
     }
-    
+
     /**
      * Test get blob data
      */
@@ -288,7 +288,7 @@ class BlobStorageTest extends BlobTestCase
 
         $this->assertEquals($blob->Url, $result);
     }
-    
+
     /**
      * Test snapshot blob
      */
@@ -337,26 +337,20 @@ class BlobStorageTest extends BlobTestCase
         } catch (BlobException $e) {
         }
 
-        // Delete should not be possible
-        $exceptionThrown = false;
         try {
             $storageClient->deleteBlob($containerName, 'test.txt');
-        } catch (Exception $e) {
-            $exceptionThrown = true;
+            $this->fail("Delete should not be possible");
+        } catch (BlobException $e) {
         }
-        $this->markTestIncomplete('Test inconclusive. Verify http://social.msdn.microsoft.com/Forums/en/windowsazure/thread/9ae25614-b1da-43ab-abca-644abc034eb3 for info.');
-        $this->assertTrue($exceptionThrown);
+        #$this->markTestIncomplete('Test inconclusive. Verify http://social.msdn.microsoft.com/Forums/en/windowsazure/thread/9ae25614-b1da-43ab-abca-644abc034eb3 for info.');
 
-        // But should work when a lease id is supplied
-        $exceptionThrown = false;
         try {
             $storageClient->putBlobData($containerName, 'test.txt', 'Hello!');
-        } catch (Exception $e) {
-            $exceptionThrown = true;
+            $this->fail("But should work when a lease id is supplied");
+        } catch (BlobException $e) {
         }
-        $this->assertFalse($exceptionThrown);
     }
-    
+
     /**
      * Test set blob properties
      */
@@ -377,7 +371,7 @@ class BlobStorageTest extends BlobTestCase
         $this->assertEquals('nl-BE', $blobInstance->ContentLanguage);
         $this->assertEquals('image/gif', $blobInstance->ContentType);
     }
-    
+
     /**
      * Test set blob metadata
      */
@@ -395,7 +389,7 @@ class BlobStorageTest extends BlobTestCase
         $metadata = $storageClient->getBlobMetadata($containerName, 'images/WindowsAzure.gif');
         $this->assertEquals('PHPAzure', $metadata['createdby']);
     }
-    
+
 	/**
      * Test set blob metadata, ensuring no additional headers can be added.
      */
@@ -406,18 +400,15 @@ class BlobStorageTest extends BlobTestCase
         $storageClient->createContainer($containerName);
         $storageClient->putBlob($containerName, 'images/WindowsAzure.gif', self::$path . 'WindowsAzure.gif');
 
-        $exceptionThrown = false;
         try {
-            // adding a newline should not be possible...
             $storageClient->setBlobMetadata($containerName, 'images/WindowsAzure.gif', array(
                         'createdby' => "PHPAzure\nx-ms-meta-something:false",
                         ));
-        } catch (Exception $ex) {
-            $exceptionThrown = true;
+            $this->fail("adding a newline should not be possible..");
+        } catch (BlobException $ex) {
         }
-        $this->assertTrue($exceptionThrown);
     }
-    
+
     /**
      * Test delete blob
      */
@@ -433,7 +424,7 @@ class BlobStorageTest extends BlobTestCase
         $result = $storageClient->listBlobs($containerName);
         $this->assertEquals(0, count($result));
     }
-    
+
     /**
      * Test list blobs
      */
@@ -456,7 +447,7 @@ class BlobStorageTest extends BlobTestCase
         $result2 = $storageClient->listBlobs($containerName, '', '', 2);
         $this->assertEquals(2, count($result2));
     }
-    
+
     /**
      * Test list blobs with all includes
      */
@@ -486,7 +477,7 @@ class BlobStorageTest extends BlobTestCase
         $this->assertEquals('PHPAzure', $result[1]->Metadata['createdby']);
         $this->assertEquals('PHPAzure', $result[1]->Metadata['ownedby']);
     }
-    
+
     /**
      * Test copy blob
      */
@@ -511,7 +502,7 @@ class BlobStorageTest extends BlobTestCase
         $this->assertEquals($containerName, $destination->Container);
         $this->assertEquals('images/WindowsAzureCopy2.gif', $destination->Name);
     }
-    
+
     /**
      * Test root container
      */
@@ -544,7 +535,7 @@ class BlobStorageTest extends BlobTestCase
         // Verify other data
         $this->assertEquals($data2 . $data2, $storageClient->getBlobData($containerName, 'test.txt'));
     }
-    
+
     /**
      * Test get page regions
      */
@@ -584,7 +575,7 @@ class BlobStorageTest extends BlobTestCase
 
         $this->assertEquals($headers["x-ms-blob-cache-control"], $blobInstance->CacheControl);
     }
-    
+
     /**
      * Test put large blob with x-ms-blob-cache-control header
      */
@@ -607,10 +598,10 @@ class BlobStorageTest extends BlobTestCase
         // Remove file
         unlink($fileName);
     }
-    
+
     /**
      * Create large file
-     * 
+     *
      * @return string Filename
      */
     protected function _createLargeFile()
