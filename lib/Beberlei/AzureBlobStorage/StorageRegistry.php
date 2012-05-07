@@ -41,7 +41,7 @@ class StorageRegistry
         }
 
         $this->accounts[$name] = new BlobClient(
-            sprintf('https://%s.blob.storage.windows.net', $accountName),
+            sprintf('https://%s.blob.storage.core.windows.net', $accountName),
             $accountName,
             $accountKey
         );
