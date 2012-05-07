@@ -8,7 +8,7 @@ class StorageRegistryTest extends \PHPUnit_Framework_TestCase
     public function testGet()
     {
         $registry = new StorageRegistry();
-        $registry->registerAccount('test', 'test', 'teststream');
+        $registry->registerAccount('test', 'test', 'test', 'teststream');
 
         $client = $registry->get('test');
 

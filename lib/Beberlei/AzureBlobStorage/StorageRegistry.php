@@ -28,18 +28,19 @@ class StorageRegistry
     /**
      * Register Account
      *
+     * @param string $name
      * @param string $accountName
      * @param string $accountKey
      * @param string $streamName
      * @return void
      */
-    public function registerAccount($accountName, $accountKey, $streamName = false)
+    public function registerAccount($name, $accountName, $accountKey, $streamName = false)
     {
-        if ( isset($this->accounts[$accountName])) {
-            throw new \RuntimeException("An account with name $accountName is already registered.");
+        if ( isset($this->accounts[$name])) {
+            throw new \RuntimeException("An account with name $name is already registered.");
         }
 
-        $this->accounts[$accountName] = new BlobClient(
+        $this->accounts[$name] = new BlobClient(
             sprintf('https://%s.blob.storage.windows.net', $accountName),
             $accountName,
             $accountKey
@@ -49,7 +50,7 @@ class StorageRegistry
             return;
         }
 
-        $this->accounts[$accountName]->registerStreamWrapper($streamName);
+        $this->accounts[$name]->registerStreamWrapper($streamName);
     }
 
     /**
