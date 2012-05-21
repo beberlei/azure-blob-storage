@@ -272,16 +272,16 @@ class BlobClient
 
         // Perform request
         $response = $this->performRequest($containerName, array('restype' => 'container'), 'PUT', $headers, false, null, self::RESOURCE_CONTAINER, self::PERMISSION_WRITE);
-        if ($response->isSuccessful()) {
-            return new BlobContainer(
-                $containerName,
-                $response->getHeader('Etag'),
-                $response->getHeader('Last-modified'),
-                $metadata
-            );
-        } else {
+        if ( ! $response->isSuccessful()) {
             throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
         }
+
+        return new BlobContainer(
+            $containerName,
+            $response->getHeader('Etag'),
+            $response->getHeader('Last-modified'),
+            $metadata
+        );
     }
 
     /**
@@ -313,47 +313,46 @@ class BlobClient
 
         // Perform request
         $response = $this->performRequest($containerName, array('restype' => 'container', 'comp' => 'acl'), 'GET', array(), false, null, self::RESOURCE_CONTAINER, self::PERMISSION_READ);
-        if ($response->isSuccessful()) {
-            if ($signedIdentifiers == false)  {
-                // Only private/blob/container
-                $accessType = $response->getHeader(Storage::PREFIX_STORAGE_HEADER . 'blob-public-access');
-                if (strtolower($accessType) == 'true') {
-                    $accessType = self::ACL_PUBLIC_CONTAINER;
-                }
-                return $accessType;
+        if ( ! $response->isSuccessful()) {
+            throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
+        }
+
+        if ($signedIdentifiers == false)  {
+            // Only private/blob/container
+            $accessType = $response->getHeader(Storage::PREFIX_STORAGE_HEADER . 'blob-public-access');
+            if (strtolower($accessType) == 'true') {
+                $accessType = self::ACL_PUBLIC_CONTAINER;
+            }
+            return $accessType;
+        }
+
+        // Parse result
+        $result = $this->parseResponse($response);
+        if (!$result) {
+            return array();
+        }
+
+        $entries = null;
+        if ($result->SignedIdentifier) {
+            if (count($result->SignedIdentifier) > 1) {
+                $entries = $result->SignedIdentifier;
             } else {
-                // Parse result
-                $result = $this->parseResponse($response);
-                if (!$result) {
-                    return array();
-                }
+                $entries = array($result->SignedIdentifier);
+            }
+        }
 
-                $entries = null;
-                if ($result->SignedIdentifier) {
-                    if (count($result->SignedIdentifier) > 1) {
-                        $entries = $result->SignedIdentifier;
-                    } else {
-                        $entries = array($result->SignedIdentifier);
-                    }
-                }
-
-                // Return value
-                $returnValue = array();
-                foreach ($entries as $entry) {
-                    $returnValue[] = new SignedIdentifier(
+        // Return value
+        $returnValue = array();
+        foreach ($entries as $entry) {
+            $returnValue[] = new SignedIdentifier(
                     $entry->Id,
                     $entry->AccessPolicy ? $entry->AccessPolicy->Start ? $entry->AccessPolicy->Start : '' : '',
                     $entry->AccessPolicy ? $entry->AccessPolicy->Expiry ? $entry->AccessPolicy->Expiry : '' : '',
                     $entry->AccessPolicy ? $entry->AccessPolicy->Permission ? $entry->AccessPolicy->Permission : '' : ''
                     );
-                }
-
-                // Return
-                return $returnValue;
-            }
-        } else {
-            throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
         }
+
+        return $returnValue;
     }
 
     /**
@@ -420,20 +419,20 @@ class BlobClient
 
         // Perform request
         $response = $this->performRequest($containerName, array('restype' => 'container'), 'GET', array(), false, null, self::RESOURCE_CONTAINER, self::PERMISSION_READ);
-        if ($response->isSuccessful()) {
-            // Parse metadata
-            $metadata = $this->parseMetadataHeaders($response->getHeaders());
+        if ( ! $response->isSuccessful()) {
+            throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
+        }
 
-            // Return container
-            return new BlobContainer(
+        // Parse metadata
+        $metadata = $this->parseMetadataHeaders($response->getHeaders());
+
+        // Return container
+        return new BlobContainer(
             $containerName,
             $response->getHeader('Etag'),
             $response->getHeader('Last-modified'),
             $metadata
-            );
-        } else {
-            throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
-        }
+        );
     }
 
     /**
@@ -642,8 +641,11 @@ class BlobClient
 
         // Perform request
         $response = $this->performRequest($resourceName, array(), 'PUT', $headers, false, $data, self::RESOURCE_BLOB, self::PERMISSION_WRITE);
-        if ($response->isSuccessful()) {
-            return new BlobInstance(
+        if ( ! $response->isSuccessful()) {
+            throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
+        }
+
+        return new BlobInstance(
             $containerName,
             $blobName,
             null,
@@ -656,10 +658,7 @@ class BlobClient
                 '',
             false,
             $metadata
-            );
-        } else {
-            throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
-        }
+        );
     }
 
     /**
@@ -794,32 +793,32 @@ class BlobClient
 
         // Generate block list request
         $fileContents = utf8_encode(implode("\n", array(
-                '<?xml version="1.0" encoding="utf-8"?>',
-                '<BlockList>',
-                $blocks,
-                '</BlockList>'
-            )));
+            '<?xml version="1.0" encoding="utf-8"?>',
+            '<BlockList>',
+            $blocks,
+            '</BlockList>'
+        )));
 
-            // Create metadata headers
-            $headers = array();
-            if (!is_null($leaseId)) {
-                $headers['x-ms-lease-id'] = $leaseId;
-            }
-            $headers = array_merge($headers, $this->generateMetadataHeaders($metadata));
+        // Create metadata headers
+        $headers = array();
+        if (!is_null($leaseId)) {
+            $headers['x-ms-lease-id'] = $leaseId;
+        }
+        $headers = array_merge($headers, $this->generateMetadataHeaders($metadata));
 
-            // Additional headers?
-            foreach ($additionalHeaders as $key => $value) {
-                $headers[$key] = $value;
-            }
+        // Additional headers?
+        foreach ($additionalHeaders as $key => $value) {
+            $headers[$key] = $value;
+        }
 
-            // Resource name
-            $resourceName = self::createResourceName($containerName , $blobName);
+        // Resource name
+        $resourceName = self::createResourceName($containerName , $blobName);
 
-            // Perform request
-            $response = $this->performRequest($resourceName, array('comp' => 'blocklist'), 'PUT', $headers, false, $fileContents, self::RESOURCE_BLOB, self::PERMISSION_WRITE);
-            if (!$response->isSuccessful()) {
-                throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
-            }
+        // Perform request
+        $response = $this->performRequest($resourceName, array('comp' => 'blocklist'), 'PUT', $headers, false, $fileContents, self::RESOURCE_BLOB, self::PERMISSION_WRITE);
+        if ( ! $response->isSuccessful()) {
+            throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
+        }
     }
 
     /**
@@ -869,33 +868,33 @@ class BlobClient
 
         // Perform request
         $response = $this->performRequest($resourceName, $query, 'GET', $headers, false, null, self::RESOURCE_BLOB, self::PERMISSION_READ);
-        if ($response->isSuccessful()) {
-            // Parse response
-            $blockList = $this->parseResponse($response);
-
-            // Create return value
-            $returnValue = array();
-            if ($blockList->CommittedBlocks) {
-                foreach ($blockList->CommittedBlocks->Block as $block) {
-                    $returnValue['CommittedBlocks'][] = (object)array(
-                        'Name' => (string)$block->Name,
-                        'Size' => (string)$block->Size
-                    );
-                }
-            }
-            if ($blockList->UncommittedBlocks)  {
-                foreach ($blockList->UncommittedBlocks->Block as $block) {
-                    $returnValue['UncommittedBlocks'][] = (object)array(
-                        'Name' => (string)$block->Name,
-                        'Size' => (string)$block->Size
-                    );
-                }
-            }
-
-            return $returnValue;
-        } else {
+        if ( ! $response->isSuccessful()) {
             throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
         }
+
+        // Parse response
+        $blockList = $this->parseResponse($response);
+
+        // Create return value
+        $returnValue = array();
+        if ($blockList->CommittedBlocks) {
+            foreach ($blockList->CommittedBlocks->Block as $block) {
+                $returnValue['CommittedBlocks'][] = (object)array(
+                    'Name' => (string)$block->Name,
+                    'Size' => (string)$block->Size
+                );
+            }
+        }
+        if ($blockList->UncommittedBlocks)  {
+            foreach ($blockList->UncommittedBlocks->Block as $block) {
+                $returnValue['UncommittedBlocks'][] = (object)array(
+                    'Name' => (string)$block->Name,
+                    'Size' => (string)$block->Size
+                );
+            }
+        }
+
+        return $returnValue;
     }
 
     /**
@@ -943,8 +942,11 @@ class BlobClient
 
         // Perform request
         $response = $this->performRequest($resourceName, array(), 'PUT', $headers, false, '', self::RESOURCE_BLOB, self::PERMISSION_WRITE);
-        if ($response->isSuccessful()) {
-            return new BlobInstance(
+        if ( ! $response->isSuccessful()) {
+            throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
+        }
+
+        return new BlobInstance(
             $containerName,
             $blobName,
             null,
@@ -957,10 +959,7 @@ class BlobClient
                 '',
             false,
             $metadata
-            );
-        } else {
-            throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
-        }
+        );
     }
 
     /**
@@ -1018,7 +1017,7 @@ class BlobClient
 
         // Perform request
         $response = $this->performRequest($resourceName, array('comp' => 'page'), 'PUT', $headers, false, $contents, self::RESOURCE_BLOB, self::PERMISSION_WRITE);
-        if (!$response->isSuccessful()) {
+        if ( ! $response->isSuccessful()) {
             throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
         }
     }
@@ -1064,27 +1063,27 @@ class BlobClient
 
         // Perform request
         $response = $this->performRequest($resourceName, array('comp' => 'pagelist'), 'GET', $headers, false, null, self::RESOURCE_BLOB, self::PERMISSION_WRITE);
-        if ($response->isSuccessful()) {
-            $result = $this->parseResponse($response);
-            $xmlRanges = null;
-            if (count($result->PageRange) > 1) {
-                $xmlRanges = $result->PageRange;
-            } else {
-                $xmlRanges = array($result->PageRange);
-            }
-
-            $ranges = array();
-            for ($i = 0; $i < count($xmlRanges); $i++) {
-                $ranges[] = new PageRegionInstance(
-                (int)$xmlRanges[$i]->Start,
-                (int)$xmlRanges[$i]->End
-                );
-            }
-
-            return $ranges;
-        } else {
+        if ( ! $response->isSuccessful()) {
             throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
         }
+
+        $result = $this->parseResponse($response);
+        $xmlRanges = null;
+        if (count($result->PageRange) > 1) {
+            $xmlRanges = $result->PageRange;
+        } else {
+            $xmlRanges = array($result->PageRange);
+        }
+
+        $ranges = array();
+        for ($i = 0; $i < count($xmlRanges); $i++) {
+            $ranges[] = new PageRegionInstance(
+            (int)$xmlRanges[$i]->Start,
+            (int)$xmlRanges[$i]->End
+            );
+        }
+
+        return $ranges;
     }
 
     /**
@@ -1137,8 +1136,11 @@ class BlobClient
 
         // Perform request
         $response = $this->performRequest($destinationResourceName, array(), 'PUT', $headers, false, null, self::RESOURCE_BLOB, self::PERMISSION_WRITE);
-        if ($response->isSuccessful()) {
-            return new BlobInstance(
+        if ( ! $response->isSuccessful()) {
+            throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
+        }
+
+        return new BlobInstance(
             $destinationContainerName,
             $destinationBlobName,
             null,
@@ -1151,10 +1153,7 @@ class BlobClient
                 '',
             false,
             $metadata
-            );
-        } else {
-            throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
-        }
+        );
     }
 
     /**
@@ -1216,11 +1215,11 @@ class BlobClient
 
         // Perform request
         $response = $this->performRequest($resourceName, $query, 'GET', $headers, false, null, self::RESOURCE_BLOB, self::PERMISSION_READ);
-        if ($response->isSuccessful()) {
-            return $response->getContent();
-        } else {
+        if ( ! $response->isSuccessful()) {
             throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
         }
+
+        return $response->getContent();
     }
 
     /**
@@ -1261,31 +1260,31 @@ class BlobClient
 
         // Perform request
         $response = $this->performRequest($resourceName, $query, 'HEAD', $headers, false, null, self::RESOURCE_BLOB, self::PERMISSION_READ);
-        if ($response->isSuccessful()) {
-            // Parse metadata
-            $metadata = $this->parseMetadataHeaders($response->getHeaders());
-
-            // Return blob
-            return new BlobInstance(
-                $containerName,
-                $blobName,
-                $snapshotId,
-                $response->getHeader('Etag'),
-                $response->getHeader('Last-modified'),
-                $this->getBaseUrl() . '/' . $containerName . '/' . $blobName,
-                $response->getHeader('Content-Length'),
-                $response->getHeader('Content-Type'),
-                $response->getHeader('Content-Encoding'),
-                $response->getHeader('Content-Language'),
-                $response->getHeader('Cache-Control'),
-                $response->getHeader('x-ms-blob-type'),
-                $response->getHeader('x-ms-lease-status'),
-                false,
-                $metadata
-            );
-        } else {
+        if ( ! $response->isSuccessful()) {
             throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
         }
+
+        // Parse metadata
+        $metadata = $this->parseMetadataHeaders($response->getHeaders());
+
+        // Return blob
+        return new BlobInstance(
+            $containerName,
+            $blobName,
+            $snapshotId,
+            $response->getHeader('Etag'),
+            $response->getHeader('Last-modified'),
+            $this->getBaseUrl() . '/' . $containerName . '/' . $blobName,
+            $response->getHeader('Content-Length'),
+            $response->getHeader('Content-Type'),
+            $response->getHeader('Content-Encoding'),
+            $response->getHeader('Content-Language'),
+            $response->getHeader('Cache-Control'),
+            $response->getHeader('x-ms-blob-type'),
+            $response->getHeader('x-ms-lease-status'),
+            false,
+            $metadata
+        );
     }
 
     /**
@@ -1365,7 +1364,7 @@ class BlobClient
 
         // Perform request
         $response = $this->performRequest($containerName . '/' . $blobName, array('comp' => 'metadata'), 'PUT', $headers, false, null, self::RESOURCE_BLOB, self::PERMISSION_WRITE);
-        if (!$response->isSuccessful()) {
+        if ( ! $response->isSuccessful()) {
             throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
         }
     }
@@ -1404,7 +1403,7 @@ class BlobClient
 
         // Perform request
         $response = $this->performRequest($containerName . '/' . $blobName, array('comp' => 'properties'), 'PUT', $headers, false, null, self::RESOURCE_BLOB, self::PERMISSION_WRITE);
-        if (!$response->isSuccessful()) {
+        if ( ! $response->isSuccessful()) {
             throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
         }
     }
@@ -1466,7 +1465,7 @@ class BlobClient
 
         // Perform request
         $response = $this->performRequest($resourceName, $query, 'DELETE', $headers, false, null, self::RESOURCE_BLOB, self::PERMISSION_WRITE);
-        if (!$response->isSuccessful()) {
+        if ( ! $response->isSuccessful()) {
             throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
         }
     }
@@ -1499,11 +1498,11 @@ class BlobClient
 
         // Perform request
         $response = $this->performRequest($resourceName, array('comp' => 'snapshot'), 'PUT', $headers, false, null, self::RESOURCE_BLOB, self::PERMISSION_WRITE);
-        if ($response->isSuccessful()) {
-            return $response->getHeader('x-ms-snapshot');
-        } else {
+        if ( ! $response->isSuccessful()) {
             throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
         }
+
+        return $response->getHeader('x-ms-snapshot');
     }
 
     /**
@@ -1535,16 +1534,16 @@ class BlobClient
 
         // Perform request
         $response = $this->performRequest($resourceName, array('comp' => 'lease'), 'PUT', $headers, false, null, self::RESOURCE_BLOB, self::PERMISSION_WRITE);
-        if ($response->isSuccessful()) {
-            return new LeaseInstance(
-                $containerName,
-                $blobName,
-                $response->getHeader('x-ms-lease-id'),
-                $response->getHeader('x-ms-lease-time')
-            );
-        } else {
+        if ( ! $response->isSuccessful()) {
             throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
         }
+
+        return new LeaseInstance(
+            $containerName,
+            $blobName,
+            $response->getHeader('x-ms-lease-id'),
+            $response->getHeader('x-ms-lease-time')
+        );
     }
 
     /**
@@ -1585,77 +1584,77 @@ class BlobClient
 
         // Perform request
         $response = $this->performRequest($containerName, $query, 'GET', array(), false, null, self::RESOURCE_BLOB, self::PERMISSION_LIST);
-        if ($response->isSuccessful()) {
-            // Return value
-            $blobs = array();
-
-            // Blobs
-            $xmlBlobs = $this->parseResponse($response)->Blobs->Blob;
-            if (!is_null($xmlBlobs)) {
-                for ($i = 0; $i < count($xmlBlobs); $i++) {
-                    $properties = (array)$xmlBlobs[$i]->Properties;
-
-                    $blobs[] = new BlobInstance(
-                    $containerName,
-                    (string)$xmlBlobs[$i]->Name,
-                    (string)$xmlBlobs[$i]->Snapshot,
-                    (string)$properties['Etag'],
-                    (string)$properties['Last-Modified'],
-                    (string)$xmlBlobs[$i]->Url,
-                    (string)$properties['Content-Length'],
-                    (string)$properties['Content-Type'],
-                    (string)$properties['Content-Encoding'],
-                    (string)$properties['Content-Language'],
-                    (string)$properties['Cache-Control'],
-                    (string)$properties['BlobType'],
-                    (string)$properties['LeaseStatus'],
-                    false,
-                    $this->parseMetadataElement($xmlBlobs[$i])
-                    );
-                }
-            }
-
-            // Blob prefixes (folders)
-            $xmlBlobs = $this->parseResponse($response)->Blobs->BlobPrefix;
-
-            if (!is_null($xmlBlobs)) {
-                for ($i = 0; $i < count($xmlBlobs); $i++) {
-                    $blobs[] = new BlobInstance(
-                    $containerName,
-                    (string)$xmlBlobs[$i]->Name,
-                    null,
-                        '',
-                        '',
-                        '',
-                    0,
-                        '',
-                        '',
-                        '',
-                        '',
-                        '',
-                        '',
-                    true,
-                    $this->parseMetadataElement($xmlBlobs[$i])
-                    );
-                }
-            }
-
-            // More blobs?
-            $xmlMarker = (string)$this->parseResponse($response)->NextMarker;
-            $currentResultCount = $currentResultCount + count($blobs);
-            if (!is_null($maxResults) && $currentResultCount < $maxResults) {
-                if (!is_null($xmlMarker) && $xmlMarker != '') {
-                    $blobs = array_merge($blobs, $this->listBlobs($containerName, $prefix, $delimiter, $maxResults, $marker, $include, $currentResultCount));
-                }
-            }
-            if (!is_null($maxResults) && count($blobs) > $maxResults) {
-                $blobs = array_slice($blobs, 0, $maxResults);
-            }
-
-            return $blobs;
-        } else {
+        if ( ! $response->isSuccessful()) {
             throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
         }
+
+        // Return value
+        $blobs = array();
+
+        // Blobs
+        $xmlBlobs = $this->parseResponse($response)->Blobs->Blob;
+        if (!is_null($xmlBlobs)) {
+            for ($i = 0; $i < count($xmlBlobs); $i++) {
+                $properties = (array)$xmlBlobs[$i]->Properties;
+
+                $blobs[] = new BlobInstance(
+                $containerName,
+                (string)$xmlBlobs[$i]->Name,
+                (string)$xmlBlobs[$i]->Snapshot,
+                (string)$properties['Etag'],
+                (string)$properties['Last-Modified'],
+                (string)$xmlBlobs[$i]->Url,
+                (string)$properties['Content-Length'],
+                (string)$properties['Content-Type'],
+                (string)$properties['Content-Encoding'],
+                (string)$properties['Content-Language'],
+                (string)$properties['Cache-Control'],
+                (string)$properties['BlobType'],
+                (string)$properties['LeaseStatus'],
+                false,
+                $this->parseMetadataElement($xmlBlobs[$i])
+                );
+            }
+        }
+
+        // Blob prefixes (folders)
+        $xmlBlobs = $this->parseResponse($response)->Blobs->BlobPrefix;
+
+        if (!is_null($xmlBlobs)) {
+            for ($i = 0; $i < count($xmlBlobs); $i++) {
+                $blobs[] = new BlobInstance(
+                $containerName,
+                (string)$xmlBlobs[$i]->Name,
+                null,
+                    '',
+                    '',
+                    '',
+                0,
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                true,
+                $this->parseMetadataElement($xmlBlobs[$i])
+                );
+            }
+        }
+
+        // More blobs?
+        $xmlMarker = (string)$this->parseResponse($response)->NextMarker;
+        $currentResultCount = $currentResultCount + count($blobs);
+        if (!is_null($maxResults) && $currentResultCount < $maxResults) {
+            if (!is_null($xmlMarker) && $xmlMarker != '') {
+                $blobs = array_merge($blobs, $this->listBlobs($containerName, $prefix, $delimiter, $maxResults, $marker, $include, $currentResultCount));
+            }
+        }
+        if (!is_null($maxResults) && count($blobs) > $maxResults) {
+            $blobs = array_slice($blobs, 0, $maxResults);
+        }
+
+        return $blobs;
     }
 
     /**
@@ -1680,14 +1679,15 @@ class BlobClient
 
         // Generate URL
         return $this->getBaseUrl() . '/' . $resourceName . '?' .
-        $this->sharedAccessSignatureCredentials->createSignedQueryString(
-        $resourceName,
-                '',
-        $resource,
-        $permissions,
-        $start,
-        $expiry,
-        $identifier);
+            $this->sharedAccessSignatureCredentials->createSignedQueryString(
+            $resourceName,
+                    '',
+            $resource,
+            $permissions,
+            $start,
+            $expiry,
+            $identifier
+        );
     }
 
     /**
