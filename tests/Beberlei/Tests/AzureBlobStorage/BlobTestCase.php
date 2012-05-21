@@ -32,6 +32,10 @@ class BlobTestCase extends \PHPUnit_Framework_TestCase
             } catch (\Exception $e) {
             }
         }
+
+        if (in_array('azure', stream_get_wrappers())) {
+            stream_wrapper_unregister('azure');
+        }
     }
 
     protected function createStorageInstance()

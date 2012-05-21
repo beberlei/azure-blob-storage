@@ -16,6 +16,8 @@
 
 namespace Beberlei\AzureBlobStorage;
 
+use Assert\Assertion;
+
 /**
  * Client for Microsoft Windows Azure Blob Storage.
  *
@@ -215,15 +217,9 @@ class BlobClient
 	 */
 	public function blobExists($containerName = '', $blobName = '', $snapshotId = null)
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($blobName === '') {
-			throw new BlobException('Blob name is not specified.');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::notEmpty($blobName, 'Blob name is not specified.');
 
 		// Get blob instance
 		try {
@@ -243,12 +239,8 @@ class BlobClient
 	 */
 	public function containerExists($containerName = '')
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
 
 		// List containers
 		$containers = $this->listContainers($containerName, 1);
@@ -271,15 +263,9 @@ class BlobClient
 	 */
 	public function createContainer($containerName = '', $metadata = array())
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if (!is_array($metadata)) {
-			throw new BlobException('Meta data should be an array of key and value pairs.');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::isArray($metadata, 'Meta data should be an array of key and value pairs.');
 
 		// Create metadata headers
 		$headers = $this->generateMetadataHeaders($metadata);
@@ -322,12 +308,8 @@ class BlobClient
 	 */
 	public function getContainerAcl($containerName = '', $signedIdentifiers = false)
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
 
 		// Perform request
 		$response = $this->performRequest($containerName, array('restype' => 'container', 'comp' => 'acl'), 'GET', array(), false, null, self::RESOURCE_CONTAINER, self::PERMISSION_READ);
@@ -384,12 +366,8 @@ class BlobClient
 	 */
 	public function setContainerAcl($containerName = '', $acl = self::ACL_PRIVATE, $signedIdentifiers = array())
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
 
 		// Headers
 		$headers = array();
@@ -437,12 +415,8 @@ class BlobClient
 	 */
 	public function getContainer($containerName = '')
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
 
 		// Perform request
 		$response = $this->performRequest($containerName, array('restype' => 'container'), 'GET', array(), false, null, self::RESOURCE_CONTAINER, self::PERMISSION_READ);
@@ -471,12 +445,8 @@ class BlobClient
 	 */
 	public function getContainerMetadata($containerName = '')
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
 
 		return $this->getContainer($containerName)->Metadata;
 	}
@@ -493,15 +463,10 @@ class BlobClient
 	 */
 	public function setContainerMetadata($containerName = '', $metadata = array(), $additionalHeaders = array())
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if (!is_array($metadata)) {
-			throw new BlobException('Meta data should be an array of key and value pairs.');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::isArray($metadata, 'Meta data should be an array of key and value pairs.');
+
 		if (count($metadata) == 0) {
 			return;
 		}
@@ -531,12 +496,8 @@ class BlobClient
 	 */
 	public function deleteContainer($containerName = '', $additionalHeaders = array())
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
 
 		// Additional headers?
 		$headers = array();
@@ -626,24 +587,12 @@ class BlobClient
 	 */
 	public function putBlob($containerName = '', $blobName = '', $localFileName = '', $metadata = array(), $leaseId = null, $additionalHeaders = array())
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($blobName === '') {
-			throw new BlobException('Blob name is not specified.');
-		}
-		if ($localFileName === '') {
-			throw new BlobException('Local file name is not specified.');
-		}
-		if (!file_exists($localFileName)) {
-			throw new BlobException('Local file not found.');
-		}
-		if ($containerName === '$root' && strpos($blobName, '/') !== false) {
-			throw new BlobException('Blobs stored in the root container can not have a name containing a forward slash (/).');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::notEmpty($blobName, 'Blob name is not specified.');
+        Assertion::notEmpty($localFileName, 'Local file name is not specified.');
+        Assertion::file($localFileName, 'Local file name is not specified.');
+        self::assertValidRootContainerBlobName($containerName, $blobName);
 
 		// Check file size
 		if (filesize($localFileName) >= self::MAX_BLOB_SIZE) {
@@ -668,18 +617,10 @@ class BlobClient
 	 */
 	public function putBlobData($containerName = '', $blobName = '', $data = '', $metadata = array(), $leaseId = null, $additionalHeaders = array())
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($blobName === '') {
-			throw new BlobException('Blob name is not specified.');
-		}
-		if ($containerName === '$root' && strpos($blobName, '/') !== false) {
-			throw new BlobException('Blobs stored in the root container can not have a name containing a forward slash (/).');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::notEmpty($blobName, 'Blob name is not specified.');
+        self::assertValidRootContainerBlobName($containerName, $blobName);
 
 		// Create metadata headers
 		$headers = array();
@@ -735,24 +676,12 @@ class BlobClient
 	 */
 	public function putLargeBlob($containerName = '', $blobName = '', $localFileName = '', $metadata = array(), $leaseId = null, $additionalHeaders = array())
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($blobName === '') {
-			throw new BlobException('Blob name is not specified.');
-		}
-		if ($localFileName === '') {
-			throw new BlobException('Local file name is not specified.');
-		}
-		if (!file_exists($localFileName)) {
-			throw new BlobException('Local file not found.');
-		}
-		if ($containerName === '$root' && strpos($blobName, '/') !== false) {
-			throw new BlobException('Blobs stored in the root container can not have a name containing a forward slash (/).');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::notEmpty($blobName, 'Blob name is not specified.');
+        Assertion::notEmpty($localFileName, 'Local file name is not specified.');
+        Assertion::file($localFileName, 'Local file name is not specified.');
+        self::assertValidRootContainerBlobName($containerName, $blobName);
 
 		// Check file size
 		if (filesize($localFileName) < self::MAX_BLOB_SIZE) {
@@ -812,20 +741,14 @@ class BlobClient
 	 */
 	public function putBlock($containerName = '', $blobName = '', $identifier = '', $contents = '', $leaseId = null)
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($identifier === '') {
-			throw new BlobException('Block identifier is not specified.');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::notEmpty($blobName, 'Blob name is not specified.');
+        Assertion::notEmpty($identifier, 'Block identifier is not specified.');
+        self::assertValidRootContainerBlobName($containerName, $blobName);
+
 		if (strlen($contents) > self::MAX_BLOB_TRANSFER_SIZE) {
 			throw new BlobException('Block size is too big.');
-		}
-		if ($containerName === '$root' && strpos($blobName, '/') !== false) {
-			throw new BlobException('Blobs stored in the root container can not have a name containing a forward slash (/).');
 		}
 
 		// Headers
@@ -857,21 +780,11 @@ class BlobClient
 	 */
 	public function putBlockList($containerName = '', $blobName = '', $blockList = array(), $metadata = array(), $leaseId = null, $additionalHeaders = array())
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($blobName === '') {
-			throw new BlobException('Blob name is not specified.');
-		}
-		if (count($blockList) == 0) {
-			throw new BlobException('Block list does not contain any elements.');
-		}
-		if ($containerName === '$root' && strpos($blobName, '/') !== false) {
-			throw new BlobException('Blobs stored in the root container can not have a name containing a forward slash (/).');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::notEmpty($blobName, 'Blob name is not specified.');
+        Assertion::notEmpty($blockList, 'Block list does not contain any elements.');
+        self::assertValidRootContainerBlobName($containerName, $blobName);
 
 		// Generate block list
 		$blocks = '';
@@ -922,15 +835,10 @@ class BlobClient
 	 */
 	public function getBlockList($containerName = '', $blobName = '', $snapshotId = null, $leaseId = null, $type = 0)
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($blobName === '') {
-			throw new BlobException('Blob name is not specified.');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::notEmpty($blobName, 'Blob name is not specified.');
+
 		if ($type < 0 || $type > 2) {
 			throw new BlobException('Invalid type of block list to retrieve.');
 		}
@@ -1004,18 +912,11 @@ class BlobClient
 	 */
 	public function createPageBlob($containerName = '', $blobName = '', $size = 0, $metadata = array(), $leaseId = null, $additionalHeaders = array())
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($blobName === '') {
-			throw new BlobException('Blob name is not specified.');
-		}
-		if ($containerName === '$root' && strpos($blobName, '/') !== false) {
-			throw new BlobException('Blobs stored in the root container can not have a name containing a forward slash (/).');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::notEmpty($blobName, 'Blob name is not specified.');
+        self::assertValidRootContainerBlobName($containerName, $blobName);
+
 		if ($size <= 0) {
 			throw new BlobException('Page blob size must be specified.');
 		}
@@ -1077,18 +978,11 @@ class BlobClient
 	 */
 	public function putPage($containerName = '', $blobName = '', $startByteOffset = 0, $endByteOffset = 0, $contents = '', $writeMethod = self::PAGE_WRITE_UPDATE, $leaseId = null, $additionalHeaders = array())
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($blobName === '') {
-			throw new BlobException('Blob name is not specified.');
-		}
-		if ($containerName === '$root' && strpos($blobName, '/') !== false) {
-			throw new BlobException('Blobs stored in the root container can not have a name containing a forward slash (/).');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::notEmpty($blobName, 'Blob name is not specified.');
+        self::assertValidRootContainerBlobName($containerName, $blobName);
+
 		if ($startByteOffset % 512 != 0) {
 			throw new BlobException('Start byte offset must be a modulus of 512.');
 		}
@@ -1142,18 +1036,11 @@ class BlobClient
 	 */
 	public function getPageRegions($containerName = '', $blobName = '', $startByteOffset = 0, $endByteOffset = 0, $leaseId = null)
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($blobName === '') {
-			throw new BlobException('Blob name is not specified.');
-		}
-		if ($containerName === '$root' && strpos($blobName, '/') !== false) {
-			throw new BlobException('Blobs stored in the root container can not have a name containing a forward slash (/).');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::notEmpty($blobName, 'Blob name is not specified.');
+        self::assertValidRootContainerBlobName($containerName, $blobName);
+
 		if ($startByteOffset % 512 != 0) {
 			throw new BlobException('Start byte offset must be a modulus of 512.');
 		}
@@ -1216,30 +1103,15 @@ class BlobClient
 	 */
 	public function copyBlob($sourceContainerName = '', $sourceBlobName = '', $destinationContainerName = '', $destinationBlobName = '', $metadata = array(), $sourceSnapshotId = null, $destinationLeaseId = null, $additionalHeaders = array())
 	{
-		if ($sourceContainerName === '') {
-			throw new BlobException('Source container name is not specified.');
-		}
-		if (!self::isValidContainerName($sourceContainerName)) {
-			throw new BlobException('Source container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($sourceBlobName === '') {
-			throw new BlobException('Source blob name is not specified.');
-		}
-		if ($destinationContainerName === '') {
-			throw new BlobException('Destination container name is not specified.');
-		}
-		if (!self::isValidContainerName($destinationContainerName)) {
-			throw new BlobException('Destination container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($destinationBlobName === '') {
-			throw new BlobException('Destination blob name is not specified.');
-		}
-		if ($sourceContainerName === '$root' && strpos($sourceBlobName, '/') !== false) {
-			throw new BlobException('Blobs stored in the root container can not have a name containing a forward slash (/).');
-		}
-		if ($destinationContainerName === '$root' && strpos($destinationBlobName, '/') !== false) {
-			throw new BlobException('Blobs stored in the root container can not have a name containing a forward slash (/).');
-		}
+        Assertion::notEmpty($sourceContainerName, 'Source container name is not specified.');
+        self::assertValidContainerName($sourceContainerName);
+        Assertion::notEmpty($sourceBlobName, 'Source blob name is not specified.');
+        self::assertValidRootContainerBlobName($sourceContainerName, $sourceBlobName);
+
+        Assertion::notEmpty($destinationContainerName, 'Destination container name is not specified.');
+        self::assertValidContainerName($destinationContainerName);
+        Assertion::notEmpty($destinationBlobName, 'Destination blob name is not specified.');
+        self::assertValidRootContainerBlobName($destinationContainerName, $destinationBlobName);
 
 		// Create metadata headers
 		$headers = array();
@@ -1298,18 +1170,10 @@ class BlobClient
 	 */
 	public function getBlob($containerName = '', $blobName = '', $localFileName = '', $snapshotId = null, $leaseId = null, $additionalHeaders = array())
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($blobName === '') {
-			throw new BlobException('Blob name is not specified.');
-		}
-		if ($localFileName === '') {
-			throw new BlobException('Local file name is not specified.');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::notEmpty($blobName, 'Blob name is not specified.');
+        Assertion::notEmpty($localFileName, 'Local file name is not specified.');
 
 		// Fetch data
 		file_put_contents($localFileName, $this->getBlobData($containerName, $blobName, $snapshotId, $leaseId, $additionalHeaders));
@@ -1328,15 +1192,9 @@ class BlobClient
 	 */
 	public function getBlobData($containerName = '', $blobName = '', $snapshotId = null, $leaseId = null, $additionalHeaders = array())
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($blobName === '') {
-			throw new BlobException('Blob name is not specified.');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::notEmpty($blobName, 'Blob name is not specified.');
 
 		// Build query string
 		$query = array();
@@ -1378,18 +1236,10 @@ class BlobClient
 	 */
 	public function getBlobInstance($containerName = '', $blobName = '', $snapshotId = null, $leaseId = null, $additionalHeaders = array())
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($blobName === '') {
-			throw new BlobException('Blob name is not specified.');
-		}
-		if ($containerName === '$root' && strpos($blobName, '/') !== false) {
-			throw new BlobException('Blobs stored in the root container can not have a name containing a forward slash (/).');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::notEmpty($blobName, 'Blob name is not specified.');
+        self::assertValidRootContainerBlobName($containerName, $blobName);
 
 		// Build query string
 		$query = array();
@@ -1450,18 +1300,10 @@ class BlobClient
 	 */
 	public function getBlobUrl($containerName = '', $blobName = '', $snapshotId = null, $leaseId = null)
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($blobName === '') {
-			throw new BlobException('Blob name is not specified.');
-		}
-		if ($containerName === '$root' && strpos($blobName, '/') !== false) {
-			throw new BlobException('Blobs stored in the root container can not have a name containing a forward slash (/).');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::notEmpty($blobName, 'Blob name is not specified.');
+        self::assertValidRootContainerBlobName($containerName, $blobName);
 
 		return $this->getBlobInstance($containerName, $blobName, $snapshotId, $leaseId)->Url;
 	}
@@ -1478,18 +1320,10 @@ class BlobClient
 	 */
 	public function getBlobMetadata($containerName = '', $blobName = '', $snapshotId = null, $leaseId = null)
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($blobName === '') {
-			throw new BlobException('Blob name is not specified.');
-		}
-		if ($containerName === '$root' && strpos($blobName, '/') !== false) {
-			throw new BlobException('Blobs stored in the root container can not have a name containing a forward slash (/).');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::notEmpty($blobName, 'Blob name is not specified.');
+        self::assertValidRootContainerBlobName($containerName, $blobName);
 
 		return $this->getBlobInstance($containerName, $blobName, $snapshotId, $leaseId)->Metadata;
 	}
@@ -1508,18 +1342,11 @@ class BlobClient
 	 */
 	public function setBlobMetadata($containerName = '', $blobName = '', $metadata = array(), $leaseId = null, $additionalHeaders = array())
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($blobName === '') {
-			throw new BlobException('Blob name is not specified.');
-		}
-		if ($containerName === '$root' && strpos($blobName, '/') !== false) {
-			throw new BlobException('Blobs stored in the root container can not have a name containing a forward slash (/).');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::notEmpty($blobName, 'Blob name is not specified.');
+        self::assertValidRootContainerBlobName($containerName, $blobName);
+
 		if (count($metadata) == 0) {
 			return;
 		}
@@ -1554,23 +1381,13 @@ class BlobClient
 	 * @param array  $additionalHeaders  Additional headers. See http://msdn.microsoft.com/en-us/library/dd179371.aspx for more information.
 	 * @throws BlobException
 	 */
-	public function setBlobProperties($containerName = '', $blobName = '', $leaseId = null, $additionalHeaders = array())
+	public function setBlobProperties($containerName = '', $blobName = '', $leaseId = null, array $additionalHeaders = array())
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($blobName === '') {
-			throw new BlobException('Blob name is not specified.');
-		}
-		if ($containerName === '$root' && strpos($blobName, '/') !== false) {
-			throw new BlobException('Blobs stored in the root container can not have a name containing a forward slash (/).');
-		}
-		if (count($additionalHeaders) == 0) {
-			throw new BlobException('No additional headers are specified.');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::notEmpty($blobName, 'Blob name is not specified.');
+        self::assertValidRootContainerBlobName($containerName, $blobName);
+        Assertion::notEmpty($additionalHeaders, 'No additional headers are specified.');
 
 		// Create headers
 		$headers = array();
@@ -1604,18 +1421,10 @@ class BlobClient
 	 */
 	public function getBlobProperties($containerName = '', $blobName = '', $snapshotId = null, $leaseId = null)
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($blobName === '') {
-			throw new BlobException('Blob name is not specified.');
-		}
-		if ($containerName === '$root' && strpos($blobName, '/') !== false) {
-			throw new BlobException('Blobs stored in the root container can not have a name containing a forward slash (/).');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::notEmpty($blobName, 'Blob name is not specified.');
+        self::assertValidRootContainerBlobName($containerName, $blobName);
 
 		return $this->getBlobInstance($containerName, $blobName, $snapshotId, $leaseId);
 	}
@@ -1632,18 +1441,10 @@ class BlobClient
 	 */
 	public function deleteBlob($containerName = '', $blobName = '', $snapshotId = null, $leaseId = null, $additionalHeaders = array())
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($blobName === '') {
-			throw new BlobException('Blob name is not specified.');
-		}
-		if ($containerName === '$root' && strpos($blobName, '/') !== false) {
-			throw new BlobException('Blobs stored in the root container can not have a name containing a forward slash (/).');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::notEmpty($blobName, 'Blob name is not specified.');
+        self::assertValidRootContainerBlobName($containerName, $blobName);
 
 		// Build query string
 		$query = array();
@@ -1682,18 +1483,10 @@ class BlobClient
 	 */
 	public function snapshotBlob($containerName = '', $blobName = '', $metadata = array(), $additionalHeaders = array())
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($blobName === '') {
-			throw new BlobException('Blob name is not specified.');
-		}
-		if ($containerName === '$root' && strpos($blobName, '/') !== false) {
-			throw new BlobException('Blobs stored in the root container can not have a name containing a forward slash (/).');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::notEmpty($blobName, 'Blob name is not specified.');
+        self::assertValidRootContainerBlobName($containerName, $blobName);
 
 		// Additional headers?
 		$headers = array();
@@ -1725,18 +1518,10 @@ class BlobClient
 	 */
 	public function leaseBlob($containerName = '', $blobName = '', $leaseAction = self::LEASE_ACQUIRE, $leaseId = null)
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
-		if ($blobName === '') {
-			throw new BlobException('Blob name is not specified.');
-		}
-		if ($containerName === '$root' && strpos($blobName, '/') !== false) {
-			throw new BlobException('Blobs stored in the root container can not have a name containing a forward slash (/).');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
+        Assertion::notEmpty($blobName, 'Blob name is not specified.');
+        self::assertValidRootContainerBlobName($containerName, $blobName);
 
 		// Additional headers?
 		$headers = array();
@@ -1777,12 +1562,8 @@ class BlobClient
 	 */
 	public function listBlobs($containerName = '', $prefix = '', $delimiter = '', $maxResults = null, $marker = null, $include = null, $currentResultCount = 0)
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
 
 		// Build query string
 		$query = array('restype' => 'container', 'comp' => 'list');
@@ -1891,12 +1672,8 @@ class BlobClient
 	 */
 	public function generateSharedAccessUrl($containerName = '', $blobName = '', $resource = 'b', $permissions = 'r', $start = '', $expiry = '', $identifier = '')
 	{
-		if ($containerName === '') {
-			throw new BlobException('Container name is not specified.');
-		}
-		if (!self::isValidContainerName($containerName)) {
-			throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
-		}
+        Assertion::notEmpty($containerName, 'Container name is not specified');
+        self::assertValidContainerName($containerName);
 
 		// Resource name
 		$resourceName = self::createResourceName($containerName , $blobName);
@@ -2026,6 +1803,20 @@ class BlobClient
 
 		return true;
 	}
+
+    public static function assertValidContainerName($containerName)
+    {
+        if (!self::isValidContainerName($containerName)) {
+            throw new BlobException('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
+        }
+    }
+
+    public static function assertValidRootContainerBlobName($containerName, $blobName)
+    {
+        if ($containerName === '$root' && strpos($blobName, '/') !== false) {
+            throw new BlobException('Blobs stored in the root container can not have a name containing a forward slash (/).');
+        }
+    }
 
 	/**
 	 * Get error message from HTTP Response;

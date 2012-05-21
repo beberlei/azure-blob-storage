@@ -1,12 +1,18 @@
 {
-    "hash": "1f8d319cca9f59e250590d842736ea7b",
+    "hash": "cbee4576fe002a712c992d2f42c060e3",
     "packages": [
         {
-            "package": "kriswallsmith/buzz",
+            "package": "beberlei/assert",
             "version": "dev-master",
-            "source-reference": "83147864bfac8d47a56ac26b901b8f39ef078489"
+            "source-reference": "8ce1ac6507d289cb76d4454e992a9a9222ac9693"
         }
     ],
     "packages-dev": null,
-    "aliases": []
+    "aliases": [
+
+    ],
+    "minimum-stability": "dev",
+    "stability-flags": [
+
+    ]
 }

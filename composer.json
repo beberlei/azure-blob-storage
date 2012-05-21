@@ -10,5 +10,8 @@
     ],
     "autoload": {
         "psr-0": {"Beberlei\\AzureBlobStorage": "lib/"}
+    },
+    "require": {
+        "beberlei/assert": ">=1.0"
     }
 }
