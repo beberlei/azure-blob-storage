@@ -81,8 +81,10 @@ class BlobClient
     const PAGE_WRITE_UPDATE = 'update';
     const PAGE_WRITE_CLEAR  = 'clear';
 
-    const URL_DEV_BLOB = 'http://127.0.0.1:10000';
-    const URL_CLOUD_BLOB = 'ssl://blob.core.windows.net';
+    const URL_DEV_BLOB     = 'http://127.0.0.1:10000';
+    const URL_CLOUD_BLOB   = 'ssl://blob.core.windows.net';
+    const DEVSTORE_ACCOUNT = "devstoreaccount1";
+    const DEVSTORE_KEY     = "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
 
     const RESOURCE_CONTAINER   = "c";
     const RESOURCE_BLOB        = "b";
@@ -102,7 +104,7 @@ class BlobClient
     /**
      * SharedAccessSignature credentials
      *
-     * @var Microsoft_WindowsAzure_Credentials_SharedAccessSignature
+     * @var CredentialsAbstract
      */
     protected $credentials = null;
 
@@ -121,8 +123,15 @@ class BlobClient
      */
     protected $accountKey;
 
+    /**
+     * @var string
+     */
     protected $apiVersion = '2009-09-19';
-    protected $protocol;
+
+    /**
+     * @var CredentialsAbstract
+     */
+    protected $sharedAccessSignatureCredentials;
 
     /**
      * Creates a new BlobClient instance
@@ -133,11 +142,13 @@ class BlobClient
      */
     public function __construct($host = self::URL_DEV_BLOB, $accountName = self::DEVSTORE_ACCOUNT, $accountKey = self::DEVSTORE_KEY)
     {
-        $this->host = $host;
+        $this->host        = $host;
         $this->accountName = $accountName;
-        $this->accountKey = $accountKey;
+        $this->accountKey  = $accountKey;
 
-        $this->credentials = new SharedKey($accountName, $accountKey, false);
+        $this->credentials                      = new SharedKey($accountName, $accountKey, ($host === self::URL_DEV_BLOB));
+        $this->sharedAccessSignatureCredentials = new SharedAccessSignature($accountName, $accountKey, ($host === self::URL_DEV_BLOB));
+
         $this->httpClient = new \Beberlei\AzureBlobStorage\Http\SocketClient;
     }
 
@@ -1769,6 +1780,7 @@ class BlobClient
 
         return true;
     }
+
     /**
      * Get base URL for creating requests
      *
@@ -1776,6 +1788,10 @@ class BlobClient
      */
     public function getBaseUrl()
     {
+        if ($this->credentials->usePathStyleUri()) {
+            return $this->host . '/' . $this->accountName;
+        }
+
         return $this->host;
     }
 

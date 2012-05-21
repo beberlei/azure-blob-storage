@@ -40,11 +40,10 @@ class BlobTestCase extends \PHPUnit_Framework_TestCase
 
     protected function createStorageInstance()
     {
-        $storageClient = null;
-        if (true) {
-            $storageClient = new BlobClient($GLOBALS['AZURESTORAGE_HOST'], $GLOBALS['AZURESTORAGE_ACCOUNT'], $GLOBALS['AZURESTORAGE_KEY'], false);
+        if ($GLOBALS['AZURESTORAGE_TYPE'] == "dev") {
+            $storageClient = new BlobClient();
         } else {
-            $storageClient = new BlobClient(TESTS_BLOB_HOST_DEV, TESTS_STORAGE_ACCOUNT_DEV, TESTS_STORAGE_KEY_DEV, true, Microsoft_WindowsAzure_RetryPolicy_RetryPolicyAbstract::retryN(10, 250));
+            $storageClient = new BlobClient($GLOBALS['AZURESTORAGE_HOST'], $GLOBALS['AZURESTORAGE_ACCOUNT'], $GLOBALS['AZURESTORAGE_KEY'], false);
         }
 
         return $storageClient;

@@ -65,7 +65,7 @@ class SharedKey extends CredentialsAbstract
 
 
 		// Determine path
-		if ($this->_usePathStyleUri) {
+		if ($this->usePathStyleUri) {
 			$path = substr($path, strpos($path, '/'));
 		}
 
@@ -98,9 +98,9 @@ class SharedKey extends CredentialsAbstract
 		sort($canonicalizedHeaders);
 
 		// Build canonicalized resource string
-		$canonicalizedResource  = '/' . $this->_accountName;
-		if ($this->_usePathStyleUri) {
-			$canonicalizedResource .= '/' . $this->_accountName;
+		$canonicalizedResource  = '/' . $this->accountName;
+		if ($this->usePathStyleUri) {
+			$canonicalizedResource .= '/' . $this->accountName;
 		}
 		$canonicalizedResource .= $path;
 		if (count($query) > 0) {
@@ -126,17 +126,17 @@ class SharedKey extends CredentialsAbstract
 		// Create string to sign
 		$stringToSign   = array();
 		$stringToSign[] = strtoupper($httpVerb); 									// VERB
-    	$stringToSign[] = $this->_issetOr($headers, 'Content-Encoding', '');		// Content-Encoding
-    	$stringToSign[] = $this->_issetOr($headers, 'Content-Language', '');		// Content-Language
+    	$stringToSign[] = $this->issetOr($headers, 'Content-Encoding', '');		// Content-Encoding
+    	$stringToSign[] = $this->issetOr($headers, 'Content-Language', '');		// Content-Language
     	$stringToSign[] = $contentLength; 											// Content-Length
-    	$stringToSign[] = $this->_issetOr($headers, 'Content-MD5', '');				// Content-MD5
-    	$stringToSign[] = $this->_issetOr($headers, 'Content-Type', '');			// Content-Type
+    	$stringToSign[] = $this->issetOr($headers, 'Content-MD5', '');				// Content-MD5
+    	$stringToSign[] = $this->issetOr($headers, 'Content-Type', '');			// Content-Type
     	$stringToSign[] = "";														// Date
-    	$stringToSign[] = $this->_issetOr($headers, 'If-Modified-Since', '');		// If-Modified-Since
-    	$stringToSign[] = $this->_issetOr($headers, 'If-Match', '');				// If-Match
-    	$stringToSign[] = $this->_issetOr($headers, 'If-None-Match', '');			// If-None-Match
-    	$stringToSign[] = $this->_issetOr($headers, 'If-Unmodified-Since', '');		// If-Unmodified-Since
-    	$stringToSign[] = $this->_issetOr($headers, 'Range', '');					// Range
+    	$stringToSign[] = $this->issetOr($headers, 'If-Modified-Since', '');		// If-Modified-Since
+    	$stringToSign[] = $this->issetOr($headers, 'If-Match', '');				// If-Match
+    	$stringToSign[] = $this->issetOr($headers, 'If-None-Match', '');			// If-None-Match
+    	$stringToSign[] = $this->issetOr($headers, 'If-Unmodified-Since', '');		// If-Unmodified-Since
+    	$stringToSign[] = $this->issetOr($headers, 'Range', '');					// Range
 
     	if (!$forTableStorage && count($canonicalizedHeaders) > 0) {
     		$stringToSign[] = implode("\n", $canonicalizedHeaders); // Canonicalized headers
@@ -144,11 +144,11 @@ class SharedKey extends CredentialsAbstract
 
     	$stringToSign[] = $canonicalizedResource;		 			// Canonicalized resource
     	$stringToSign   = implode("\n", $stringToSign);
-    	$signString     = base64_encode(hash_hmac('sha256', $stringToSign, $this->_accountKey, true));
+    	$signString     = base64_encode(hash_hmac('sha256', $stringToSign, $this->accountKey, true));
 
     	// Sign request
     	$headers[CredentialsAbstract::PREFIX_STORAGE_HEADER . 'date'] = $requestDate;
-    	$headers['Authorization'] = 'SharedKey ' . $this->_accountName . ':' . $signString;
+    	$headers['Authorization'] = 'SharedKey ' . $this->accountName . ':' . $signString;
 
     	// Return headers
     	return $headers;

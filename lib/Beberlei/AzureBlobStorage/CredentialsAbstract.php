@@ -48,21 +48,21 @@ abstract class CredentialsAbstract
 	 *
 	 * @var string
 	 */
-	protected $_accountName = '';
+	protected $accountName = '';
 
 	/**
 	 * Account key for Windows Azure
 	 *
 	 * @var string
 	 */
-	protected $_accountKey = '';
+	protected $accountKey = '';
 
 	/**
 	 * Use path-style URI's
 	 *
 	 * @var boolean
 	 */
-	protected $_usePathStyleUri = false;
+	protected $usePathStyleUri = false;
 
 	/**
 	 * Creates a new Microsoft_WindowsAzure_Credentials_CredentialsAbstract instance
@@ -76,46 +76,20 @@ abstract class CredentialsAbstract
 		$accountKey  = CredentialsAbstract::DEVSTORE_KEY,
 		$usePathStyleUri = false
 	) {
-		$this->_accountName = $accountName;
-		$this->_accountKey = base64_decode($accountKey);
-		$this->_usePathStyleUri = $usePathStyleUri;
+		$this->accountName     = $accountName;
+		$this->accountKey      = base64_decode($accountKey);
+		$this->usePathStyleUri = $usePathStyleUri;
 	}
 
-	/**
-	 * Set account name for Windows Azure
-	 *
-	 * @param  string $value
-	 * @return Microsoft_WindowsAzure_Credentials_CredentialsAbstract
-	 */
-	public function setAccountName($value = Microsoft_WindowsAzure_Credentials_CredentialsAbstract::DEVSTORE_ACCOUNT)
-	{
-		$this->_accountName = $value;
-		return $this;
-	}
-
-	/**
-	 * Set account key for Windows Azure
-	 *
-	 * @param  string $value
-	 * @return Microsoft_WindowsAzure_Credentials_CredentialsAbstract
-	 */
-	public function setAccountkey($value = Microsoft_WindowsAzure_Credentials_CredentialsAbstract::DEVSTORE_KEY)
-	{
-		$this->_accountKey = base64_decode($value);
-		return $this;
-	}
-
-	/**
-	 * Set use path-style URI's
-	 *
-	 * @param  boolean $value
-	 * @return Microsoft_WindowsAzure_Credentials_CredentialsAbstract
-	 */
-	public function setUsePathStyleUri($value = false)
-	{
-		$this->_usePathStyleUri = $value;
-		return $this;
-	}
+    /**
+     * Check if this credentials want path-style uris (dev-storage)
+     *
+     * @return bool
+     */
+    public function usePathStyleUri()
+    {
+        return $this->usePathStyleUri;
+    }
 
 	/**
 	 * Sign request URL with credentials
@@ -163,7 +137,7 @@ abstract class CredentialsAbstract
 	 * @param mixed $valueIfNotSet
 	 * @return mixed
 	 */
-	protected function _issetOr($array, $key, $valueIfNotSet)
+	protected function issetOr($array, $key, $valueIfNotSet)
 	{
 		return isset($array[$key]) ? $array[$key] : $valueIfNotSet;
 	}

@@ -27,7 +27,7 @@ class SharedAccessSignature extends CredentialsAbstract
      *
      * @var array
      */
-    protected $_permissionSet = array();
+    protected $permissionSet = array();
 
 	/**
 	 * Creates a new Credentials_SharedAccessSignature instance
@@ -43,7 +43,7 @@ class SharedAccessSignature extends CredentialsAbstract
 		$usePathStyleUri = false, $permissionSet = array()
 	) {
 	    parent::__construct($accountName, $accountKey, $usePathStyleUri);
-	    $this->_permissionSet = $permissionSet;
+	    $this->permissionSet = $permissionSet;
 	}
 
 	/**
@@ -53,7 +53,7 @@ class SharedAccessSignature extends CredentialsAbstract
 	 */
     public function getPermissionSet()
 	{
-	    return $this->_permissionSet;
+	    return $this->permissionSet;
 	}
 
 	/**
@@ -71,11 +71,11 @@ class SharedAccessSignature extends CredentialsAbstract
     public function setPermissionSet($value = array())
 	{
 		foreach ($value as $url) {
-			if (strpos($url, $this->_accountName) === false) {
+			if (strpos($url, $this->accountName) === false) {
 				throw new Exception('The permission set can only contain URLs for the account name specified in the Credentials_SharedAccessSignature instance.');
 			}
 		}
-	    $this->_permissionSet = $value;
+	    $this->permissionSet = $value;
 	}
 
     /**
@@ -98,7 +98,7 @@ class SharedAccessSignature extends CredentialsAbstract
     	$identifier = ''
     ) {
 		// Determine path
-		if ($this->_usePathStyleUri) {
+		if ($this->usePathStyleUri) {
 			$path = substr($path, strpos($path, '/'));
 		}
 
@@ -108,9 +108,9 @@ class SharedAccessSignature extends CredentialsAbstract
 		}
 
 		// Build canonicalized resource string
-		$canonicalizedResource  = '/' . $this->_accountName;
-		/*if ($this->_usePathStyleUri) {
-			$canonicalizedResource .= '/' . $this->_accountName;
+		$canonicalizedResource  = '/' . $this->accountName;
+		/*if ($this->usePathStyleUri) {
+			$canonicalizedResource .= '/' . $this->accountName;
 		}*/
 		$canonicalizedResource .= $path;
 
@@ -123,7 +123,7 @@ class SharedAccessSignature extends CredentialsAbstract
     	$stringToSign[] = $identifier;
 
     	$stringToSign = implode("\n", $stringToSign);
-    	$signature    = base64_encode(hash_hmac('sha256', $stringToSign, $this->_accountKey, true));
+    	$signature    = base64_encode(hash_hmac('sha256', $stringToSign, $this->accountKey, true));
 
     	return $signature;
     }
