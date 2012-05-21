@@ -119,9 +119,9 @@ class Stream
         $url = parse_url($path);
         if ($url['host']) {
             $fileName = isset($url['path']) ? $url['path'] : $url['host'];
-    	    if (strpos($fileName, '/') === 0) {
-    	        $fileName = substr($fileName, 1);
-    	    }
+            if (strpos($fileName, '/') === 0) {
+                $fileName = substr($fileName, 1);
+            }
             return $fileName;
         }
 
@@ -152,7 +152,7 @@ class Stream
         // Write mode?
         if (strpbrk($mode, 'wax+')) {
             $this->writeMode = true;
-    	} else {
+        } else {
             $this->writeMode = false;
         }
 
