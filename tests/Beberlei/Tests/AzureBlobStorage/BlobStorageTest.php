@@ -362,9 +362,9 @@ class BlobStorageTest extends BlobTestCase
         $storageClient->putBlob($containerName, 'images/WindowsAzure.gif', self::$path . 'WindowsAzure.gif');
 
         $storageClient->setBlobProperties($containerName, 'images/WindowsAzure.gif', null, array(
-                    'x-ms-blob-content-language' => 'nl-BE',
-                    'x-ms-blob-content-type' => 'image/gif'
-                    ));
+            'x-ms-blob-content-language' => 'nl-BE',
+            'x-ms-blob-content-type'     => 'image/gif'
+        ));
 
         $blobInstance = $storageClient->getBlobInstance($containerName, 'images/WindowsAzure.gif');
 

@@ -35,7 +35,9 @@ class Response
     {
         $this->code    = $code;
         $this->body    = $body;
-        $this->headers = $headers;
+        foreach ($headers as $header => $value) {
+            $this->headers[strtolower($header)] = $value;
+        }
     }
 
     /**
@@ -74,6 +76,8 @@ class Response
      */
     public function getHeader($name)
     {
+        $name = strtolower($name);
+
         if ( ! isset($this->headers[$name])) {
             return null;
         }
