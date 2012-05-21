@@ -293,7 +293,7 @@ class BlobClient
      */
     public function createContainerIfNotExists($containerName = '', $metadata = array())
     {
-        if (!$this->containerExists($containerName)) {
+        if ( ! $this->containerExists($containerName)) {
             $this->createContainer($containerName, $metadata);
         }
     }
@@ -328,7 +328,7 @@ class BlobClient
 
         // Parse result
         $result = $this->parseResponse($response);
-        if (!$result) {
+        if ( ! $result) {
             return array();
         }
 
@@ -400,7 +400,7 @@ class BlobClient
 
         // Perform request
         $response = $this->performRequest($containerName, array('restype' => 'container', 'comp' => 'acl'), 'PUT', $headers, false, $policies, self::RESOURCE_CONTAINER, self::PERMISSION_WRITE);
-        if (!$response->isSuccessful()) {
+        if ( ! $response->isSuccessful()) {
             throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
         }
     }
@@ -481,7 +481,7 @@ class BlobClient
 
         // Perform request
         $response = $this->performRequest($containerName, array('restype' => 'container', 'comp' => 'metadata'), 'PUT', $headers, false, null, self::RESOURCE_CONTAINER, self::PERMISSION_WRITE);
-        if (!$response->isSuccessful()) {
+        if ( ! $response->isSuccessful()) {
             throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
         }
     }
@@ -506,7 +506,7 @@ class BlobClient
 
         // Perform request
         $response = $this->performRequest($containerName, array('restype' => 'container'), 'DELETE', $headers, false, null, self::RESOURCE_CONTAINER, self::PERMISSION_WRITE);
-        if (!$response->isSuccessful()) {
+        if ( ! $response->isSuccessful()) {
             throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
         }
     }
@@ -761,7 +761,7 @@ class BlobClient
 
         // Upload
         $response = $this->performRequest($resourceName, array('comp' => 'block', 'blockid' => base64_encode($identifier)), 'PUT', $headers, false, $contents, self::RESOURCE_BLOB, self::PERMISSION_WRITE);
-        if (!$response->isSuccessful()) {
+        if ( ! $response->isSuccessful()) {
             throw new BlobException($this->getErrorMessage($response, 'Resource could not be accessed.'));
         }
     }
