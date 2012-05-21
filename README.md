@@ -1,18 +1,18 @@
 # Azure Blob Storage
 
-Small library that allows you to work with Windows Azure Blob Storage from PHP.
-
-The code is forked and adapted from the [PHP Azure SDK](http://phpazure.codeplex.com/).
-It was cleaned up slightly and removed all its dependencies to be very leightweight.
+Small platform-independent library that allows you to work with Windows Azure Blob Storage from PHP.
 
 You can work with Windows Azure Blob from any platform (Windows or Linux) and only need an Azure storage account to get started.
 
 Features:
 
-* Programmatic API to work with blobs
-* Containers Management (Private or Public)
+* Programmatic API to work with files/blobs
 * Streamwrapper
+* Containers Management (Private or Public)
 * ACLs
+
+The code is forked and adapted from the [PHP Azure SDK](http://phpazure.codeplex.com/).
+It is cleaned up and stripped from all the PHP Azure SDK dependencies to be very leightweight.
 
 ## Installation
 
